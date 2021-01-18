@@ -9,3 +9,7 @@
 
 # IntelliJ ignored files
 .idea/
+
+# Ignore class files for client and server
+client/target
+server/target
