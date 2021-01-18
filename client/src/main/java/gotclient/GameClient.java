@@ -55,8 +55,9 @@ public class GameClient {
 
           ServerResponse serverResponse = ServerResponse.fromServerInput(in.readLine());
 
-          if (serverResponse.getGameState().equals("finished")) {
-            // TODO notify other player of the result
+          if (serverResponse.getGameState().contains("finished")) {
+            out.println(serverResponse.getGameState());
+            System.out.println(serverResponse.getGameState());
             break;
           }
 

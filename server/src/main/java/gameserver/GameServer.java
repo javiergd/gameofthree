@@ -51,7 +51,7 @@ public class GameServer {
 
   protected void forwardMessage(final String message, final int fromId, final int toId) {
     GameServerThread playerToSend = playerMap.get(toId);
-    ServerResponse response = new ServerResponse(fromId, message, turnsPlayed == 0);
+    ServerResponse response = ServerResponse.buildResponse(fromId, message, turnsPlayed == 0);
     logger.info("Sending message to player: " + toId);
     playerToSend.sendMessage(response.toString());
     turnsPlayed++;

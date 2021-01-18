@@ -12,12 +12,12 @@ class ServerResponseTest {
     int playerId = 2;
     boolean isFirstTurn = false;
 
-    ServerResponse response = new ServerResponse(playerId, message, isFirstTurn);
+    ServerResponse response = ServerResponse.buildResponse(playerId, message, isFirstTurn);
 
-    assertThat(response.getPlayerId()).isEqualTo(playerId);
+    assertThat(response.getFromId()).isEqualTo(playerId);
     assertThat(response.getPlayerResponse()).isEqualTo(3);
     assertThat(response.getDivisionResult()).isEqualTo(1);
-    assertThat(response.getGameState()).isEqualTo("finished");
+    assertThat(response.getGameState()).contains("finished");
 
     System.out.println(response);
   }
