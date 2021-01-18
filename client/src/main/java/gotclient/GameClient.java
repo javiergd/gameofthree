@@ -1,5 +1,6 @@
 package gotclient;
 
+import gotclient.message.ClientRequestHandler;
 import gotclient.message.ServerResponse;
 import org.apache.log4j.Logger;
 
@@ -32,42 +33,36 @@ public class GameClient {
         new BufferedReader(
           new InputStreamReader(System.in))
     ) {
-      String fromUser;
       String fromServer = in.readLine();
       System.out.println(fromServer); // Greeting from the server
 
       int playerId = Integer.parseInt(fromServer.split(":")[1]);
       System.out.println("I am player: " + playerId);
+
       boolean myTurn = playerId == 1;
       int turnCounter = myTurn ? 0 : 1;
+      ClientRequestHandler clientRequestHandler = new ClientRequestHandler(stdIn);
+      int currentNumber = 0;
 
       while(true) {
         if (myTurn) {
-          int userNumber;
-          if (turnCounter == 0) {
-            System.out.print("Enter a number to start the game: ");
-          } else {
-            System.out.print("Enter {-1, 0, 1} to add to the number: ");
-          }
-          fromUser = stdIn.readLine();
-          if (fromUser.equals("exit")) {
-            out.println("exit");
-            break;
-          }
-          userNumber = Integer.parseInt(fromUser);
-
-          out.println(userNumber);
+          int userNumber = clientRequestHandler.getValidNumber(turnCounter == 0);
+          out.println(currentNumber + userNumber);
           turnCounter++;
-          logger.info("Turns played: " + turnCounter);
           myTurn = false;
         } else {
           System.out.println("Waiting for server input...");
+
           ServerResponse serverResponse = ServerResponse.fromServerInput(in.readLine());
 
-          if (serverResponse.getGameState().equals("finished")) break;
+          if (serverResponse.getGameState().equals("finished")) {
+            // TODO notify other player of the result
+            break;
+          }
 
           System.out.println("From: " + serverResponse);
           myTurn = true;
+          currentNumber = serverResponse.getDivisionResult();
         }
       }
     }  catch (IOException e) {
