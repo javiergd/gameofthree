@@ -23,6 +23,8 @@
     <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <log4j.version>1.2.17</log4j.version>
+    <lombok.version>1.18.16</lombok.version>
+    <assertj.core.version>3.18.1</assertj.core.version>
   </properties>
 
   <dependencies>
@@ -30,6 +32,18 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.core.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
