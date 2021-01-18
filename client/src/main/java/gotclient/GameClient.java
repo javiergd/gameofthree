@@ -1,5 +1,6 @@
 package gotclient;
 
+import gotclient.message.ServerResponse;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -15,10 +16,11 @@ public class GameClient {
   public static final String DEFAULT_HOST = "localhost";
 
   public static void main(String[] args) {
-    handleConnection();
+    GameClient client = new GameClient();
+    client.handleConnection();
   }
 
-  private static void handleConnection() {
+  private void handleConnection() {
     try (
       Socket clientSocket = new Socket(DEFAULT_HOST, DEFAULT_PORT);
       PrintWriter out =
@@ -37,25 +39,34 @@ public class GameClient {
       int playerId = Integer.parseInt(fromServer.split(":")[1]);
       System.out.println("I am player: " + playerId);
       boolean myTurn = playerId == 1;
+      int turnCounter = myTurn ? 0 : 1;
 
       while(true) {
         if (myTurn) {
-          System.out.print("Enter a message: ");
+          int userNumber;
+          if (turnCounter == 0) {
+            System.out.print("Enter a number to start the game: ");
+          } else {
+            System.out.print("Enter {-1, 0, 1} to add to the number: ");
+          }
           fromUser = stdIn.readLine();
-
           if (fromUser.equals("exit")) {
             out.println("exit");
             break;
           }
+          userNumber = Integer.parseInt(fromUser);
 
-          out.println(fromUser);
+          out.println(userNumber);
+          turnCounter++;
+          logger.info("Turns played: " + turnCounter);
           myTurn = false;
         } else {
-          System.out.println("Waiting for server input");
-          fromServer = in.readLine();
-          if (fromServer.equals("exit")) break;
+          System.out.println("Waiting for server input...");
+          ServerResponse serverResponse = ServerResponse.fromServerInput(in.readLine());
 
-          System.out.println("Server says: " + fromServer);
+          if (serverResponse.getGameState().equals("finished")) break;
+
+          System.out.println("From: " + serverResponse);
           myTurn = true;
         }
       }

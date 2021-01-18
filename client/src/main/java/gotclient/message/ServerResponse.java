@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class ServerResponse {
 
-  public static final String RESPONSE_FIELD_SEPARATOR = ", ";
+  public static final String RESPONSE_FIELD_SEPARATOR = ",";
   public static final String KEY_VALUE_SEPARATOR = ":";
 
   private int playerId;
