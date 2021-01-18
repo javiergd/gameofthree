@@ -18,7 +18,7 @@ public class GameServerThread extends Thread {
   private PrintWriter out;
 
   public GameServerThread(Socket socket, GameServer server, final int playerId) {
-    super("GameServerThread");
+    super("GameServerThread - " + playerId);
     this.socket = socket;
     this.server = server;
     this.playerId = playerId;
@@ -41,9 +41,9 @@ public class GameServerThread extends Thread {
 
       while ((inputLine = in.readLine()) != null) {
         if (playerId == 1)
-          server.forwardMessage(inputLine, 2);
+          server.forwardMessage(inputLine, 1, 2);
         else {
-          server.forwardMessage(inputLine, 1);
+          server.forwardMessage(inputLine, 2, 1);
         }
       }
 
@@ -54,7 +54,7 @@ public class GameServerThread extends Thread {
     }
   }
 
-  public void sendMessage(String message) {
+  protected void sendMessage(String message) {
     out.println(message);
   }
 }
