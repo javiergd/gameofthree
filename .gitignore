@@ -1,6 +1,6 @@
 # Default ignored files
 /shelf/
-/.idea/workspace.xml
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
@@ -13,3 +13,8 @@
 # Ignore class files for client and server
 client/target
 server/target
+
+# Ignore java version and application logs
+.java-version
+*log4j-application.log
+
