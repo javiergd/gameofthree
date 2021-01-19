@@ -13,10 +13,9 @@ public class GameServerThread extends Thread {
 
   private static final Logger logger = Logger.getLogger(GameServerThread.class);
   private final int playerId;
+  private final int opponentId;
   private final Socket socket;
   private final GameServer server;
-
-  private int turnsPlayed;
 
   private PrintWriter out;
 
@@ -25,7 +24,7 @@ public class GameServerThread extends Thread {
     this.socket = socket;
     this.server = server;
     this.playerId = playerId;
-    this.turnsPlayed = 0;
+    this.opponentId = playerId == 1 ? 2 : 1;
     try {
       this.out = new PrintWriter(socket.getOutputStream(), true);
     } catch (IOException e) {
@@ -39,19 +38,17 @@ public class GameServerThread extends Thread {
       BufferedReader in = new BufferedReader(
         new InputStreamReader(socket.getInputStream()));
     ) {
-      // Send the welcome message
+      // Pre-game action - send welcome message
       ClientResponseHandler responseHandler = new ClientResponseHandler(0, playerId);
-      out.println(responseHandler.buildResponseString()); // Generate initial game state
+      sendMessage(responseHandler.buildResponseString()); // Generate initial game state
 
+      // In-game: turn-based message exchange
       String inputLine;
       while ((inputLine = in.readLine()) != null) {
-        if (playerId == 1)
-          server.forwardMessage(inputLine, 1, 2);
-        else {
-          server.forwardMessage(inputLine, 2, 1);
-        }
+          server.forwardMessage(inputLine, playerId, opponentId);
       }
 
+      // Post-game: cleanup
       out.close();
       socket.close();
     } catch (IOException e) {
