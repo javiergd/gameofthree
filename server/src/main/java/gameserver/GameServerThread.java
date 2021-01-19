@@ -1,5 +1,6 @@
 package gameserver;
 
+import gameserver.message.ClientResponseHandler;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -15,6 +16,8 @@ public class GameServerThread extends Thread {
   private final Socket socket;
   private final GameServer server;
 
+  private int turnsPlayed;
+
   private PrintWriter out;
 
   public GameServerThread(Socket socket, GameServer server, final int playerId) {
@@ -22,6 +25,7 @@ public class GameServerThread extends Thread {
     this.socket = socket;
     this.server = server;
     this.playerId = playerId;
+    this.turnsPlayed = 0;
     try {
       this.out = new PrintWriter(socket.getOutputStream(), true);
     } catch (IOException e) {
@@ -35,10 +39,11 @@ public class GameServerThread extends Thread {
       BufferedReader in = new BufferedReader(
         new InputStreamReader(socket.getInputStream()));
     ) {
+      // Send the welcome message
+      ClientResponseHandler responseHandler = new ClientResponseHandler(0, playerId);
+      out.println(responseHandler.buildResponseString()); // Generate initial game state
+
       String inputLine;
-
-      out.println("Player id:" + playerId);
-
       while ((inputLine = in.readLine()) != null) {
         if (playerId == 1)
           server.forwardMessage(inputLine, 1, 2);

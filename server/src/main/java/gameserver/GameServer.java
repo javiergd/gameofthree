@@ -1,6 +1,6 @@
 package gameserver;
 
-import gameserver.message.ServerResponse;
+import gameserver.message.ClientResponseHandler;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -16,10 +16,11 @@ public class GameServer {
   public static final int DEFAULT_PORT = 54321;
 
   private Map<Integer, GameServerThread> playerMap;
-  private static int turnsPlayed = 0;
+  private int turnsPlayed;
 
   public GameServer() {
     this.playerMap = new HashMap<>();
+    this.turnsPlayed = 0;
   }
 
   public static void main(String[] args) {
@@ -51,9 +52,11 @@ public class GameServer {
 
   protected void forwardMessage(final String message, final int fromId, final int toId) {
     GameServerThread playerToSend = playerMap.get(toId);
-    ServerResponse response = ServerResponse.buildResponse(fromId, message, turnsPlayed == 0);
     logger.info("Sending message to player: " + toId);
-    playerToSend.sendMessage(response.toString());
+    ClientResponseHandler inGameResponse = new ClientResponseHandler(fromId,
+      message, turnsPlayed == 0);
+
+    playerToSend.sendMessage(inGameResponse.buildResponseString());
     turnsPlayed++;
   }
 
