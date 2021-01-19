@@ -17,19 +17,33 @@ public class GameServer {
 
   private Map<Integer, GameServerThread> playerMap;
   private int turnsPlayed;
+  private int port;
 
-  public GameServer() {
+  public GameServer(String[] args) {
     this.playerMap = new HashMap<>();
     this.turnsPlayed = 0;
+    this.port = getPortFromArgsOrDefault(args);
   }
 
   public static void main(String[] args) {
-    GameServer server = new GameServer();
+    GameServer server = new GameServer(args);
     server.acceptConnections();
   }
 
+  protected void forwardMessage(final String message, final int fromId, final int toId) {
+    GameServerThread playerToSend = playerMap.get(toId);
+    logger.info("Sending message to player: " + toId);
+    ClientResponseHandler response = new ClientResponseHandler(fromId,
+      message, turnsPlayed == 0);
+
+    System.out.println(response.buildResponseString());
+
+    playerToSend.sendMessage(response.buildResponseString());
+    turnsPlayed++;
+  }
+
   private void acceptConnections() {
-    try (ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT)) {
+    try (ServerSocket serverSocket = new ServerSocket(port)) {
       logger.info("Waiting for connections...");
       int connectionCount = 0;
       while(connectionCount < MAX_CONNECTIONS) {
@@ -50,14 +64,18 @@ public class GameServer {
     }
   }
 
-  protected void forwardMessage(final String message, final int fromId, final int toId) {
-    GameServerThread playerToSend = playerMap.get(toId);
-    logger.info("Sending message to player: " + toId);
-    ClientResponseHandler inGameResponse = new ClientResponseHandler(fromId,
-      message, turnsPlayed == 0);
-
-    playerToSend.sendMessage(inGameResponse.buildResponseString());
-    turnsPlayed++;
+  private int getPortFromArgsOrDefault(String[] args) {
+    if (args.length == 1) {
+      try {
+        return Integer.parseInt(args[0]);
+      } catch (NumberFormatException e) {
+        System.out.println("Invalid port number supplied. Using port " + DEFAULT_PORT + " for connections");
+        return DEFAULT_PORT;
+      }
+    }
+    else {
+      System.out.println("No port supplied. Using port " + DEFAULT_PORT + " for connections");
+      return DEFAULT_PORT;
+    }
   }
-
 }
