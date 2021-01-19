@@ -1,7 +1,6 @@
 package gotclient;
 
-import gotclient.message.ClientRequestHandler;
-import gotclient.message.ServerResponse;
+import gotclient.gamemanager.GameManager;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -24,48 +23,35 @@ public class GameClient {
   private void handleConnection() {
     try (
       Socket clientSocket = new Socket(DEFAULT_HOST, DEFAULT_PORT);
-      PrintWriter out =
+      PrintWriter writer =
         new PrintWriter(clientSocket.getOutputStream(), true);
-      BufferedReader in =
+      BufferedReader reader =
         new BufferedReader(
           new InputStreamReader(clientSocket.getInputStream()));
       BufferedReader stdIn =
         new BufferedReader(
           new InputStreamReader(System.in))
     ) {
-      String fromServer = in.readLine();
-      System.out.println(fromServer); // Greeting from the server
+      // Pre-game actions
+      GameManager gameManager = new GameManager(reader, writer, stdIn);
+      gameManager.initPlayerVariables();
 
-      int playerId = Integer.parseInt(fromServer.split(":")[1]);
-      System.out.println("I am player: " + playerId);
-
-      boolean myTurn = playerId == 1;
-      int turnCounter = myTurn ? 0 : 1;
-      ClientRequestHandler clientRequestHandler = new ClientRequestHandler(stdIn);
-      int currentNumber = 0;
-
-      while(true) {
-        if (myTurn) {
-          int userNumber = clientRequestHandler.getValidNumber(turnCounter == 0);
-          out.println(currentNumber + userNumber);
-          turnCounter++;
-          myTurn = false;
+      // In-game actions
+      while(!gameManager.isGameFinished()) {
+        if (gameManager.isThisPlayerTurn()) {
+          int userNumber = gameManager.getNumberFromPlayer();
+          gameManager.sendMove(userNumber);
         } else {
           System.out.println("Waiting for server input...");
-
-          ServerResponse serverResponse = ServerResponse.fromServerInput(in.readLine());
-
-          if (serverResponse.getGameState().contains("finished")) {
-            out.println(serverResponse.getGameState());
-            System.out.println(serverResponse.getGameState());
-            break;
-          }
-
-          System.out.println("From: " + serverResponse);
-          myTurn = true;
-          currentNumber = serverResponse.getDivisionResult();
+          gameManager.processResponse(reader.readLine());
         }
+        gameManager.updateTurn();
       }
+
+      // Post game completion actions
+      gameManager.sendGameEnded();
+      System.out.println("Game ended! - Winner is player: " + gameManager.getWinnerId());
+
     }  catch (IOException e) {
       logger.error("Couldn't get I/O for the connection to localhost");
       System.exit(1);
