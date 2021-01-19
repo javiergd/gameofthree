@@ -7,11 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.log4j.Logger;
 
 public class ClientResponseHandler {
 
-  private static final Logger logger = Logger.getLogger(ClientResponseHandler.class);
   public static final int GAME_FINISHED = 2;
 
   private final ClientResponseJson clientResponse;
@@ -44,13 +42,8 @@ public class ClientResponseHandler {
     this.clientResponse = response;
   }
 
-  public String buildResponseString() {
-    try {
-      return objectMapper.writeValueAsString(clientResponse);
-    } catch (JsonProcessingException e) {
-      logger.error("Unable to write response as string: " + e);
-    }
-    return "";
+  public String buildResponseString() throws JsonProcessingException {
+    return objectMapper.writeValueAsString(clientResponse);
   }
 
   private ClientResponseJson buildEndOfGameResponse(
@@ -81,7 +74,7 @@ public class ClientResponseHandler {
     return ClientResponseJson.builder()
       .gameState(gameState)
       .playerId(playerId)
-      .previousNumber(currentGameNumber)
+      .previousNumber(currentGameNumber - playerResponse)
       .playerResponse(playerResponse)
       .divisionResult(divisionResult)
       .isGameFinished(isGameFinished)
