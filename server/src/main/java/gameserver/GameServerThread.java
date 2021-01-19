@@ -41,19 +41,23 @@ public class GameServerThread extends Thread {
     ) {
       // Pre-game action - send welcome message
       ClientResponseHandler responseHandler = new ClientResponseHandler(0, playerId);
-      sendMessage(responseHandler.buildResponseString()); // Generate initial game state
+      sendMessage(responseHandler.buildResponseString());
 
       // In-game: turn-based message exchange
       String inputLine;
       while ((inputLine = in.readLine()) != null) {
           server.forwardMessage(inputLine, playerId, opponentId);
       }
-
+    } catch (IOException e) {
+      logger.error("Exception caught: " + e);
+    } finally {
       // Post-game: cleanup
       out.close();
-      socket.close();
-    } catch (IOException e) {
-      logger.error("Exception caught: " + e.getMessage());
+      try {
+        socket.close();
+      } catch (IOException e) {
+        logger.error("Exception trying to close GameServerThread socket: " + e);
+      }
     }
   }
 
