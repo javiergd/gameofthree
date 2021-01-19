@@ -22,15 +22,13 @@ public class ServerResponseHandler {
     }
   }
 
+  public int getGameState() {return serverResponse.getGameState();}
+
   public int getPlayerId() {
     return serverResponse.getPlayerId();
   }
 
   public int getDivisionResult() {return serverResponse.getDivisionResult();}
-
-  public boolean isGameFinished() {
-    return serverResponse.isGameFinished();
-  }
 
   public int getWinnerId() {return serverResponse.getWinnerId();}
 
@@ -38,9 +36,9 @@ public class ServerResponseHandler {
     StringBuilder sb = new StringBuilder();
     sb.append("[")
       .append("From player: ").append(serverResponse.getPlayerId()).append(" || ")
+      .append("Previous number: ").append(serverResponse.getPreviousNumber()).append(" || ")
       .append("Response: ").append(serverResponse.getPlayerResponse()).append(" || ")
-      .append("Current game number: ").append(serverResponse.getDivisionResult()).append(" || ")
-      .append("Is game finished: ").append(serverResponse.isGameFinished())
+      .append("Current game number: ").append(serverResponse.getDivisionResult())
       .append("]");
 
     return sb.toString();
@@ -50,8 +48,9 @@ public class ServerResponseHandler {
   @Setter
   @NoArgsConstructor
   private static class ServerResponseJson {
-    private int messageType;
+    private int gameState;
     private int playerId;
+    private int previousNumber;
     private int playerResponse;
     private int divisionResult;
     private boolean isGameFinished;

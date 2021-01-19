@@ -19,7 +19,7 @@ class ServerResponseHandlerTest {
     responseHandler.updateResponse(inputString);
 
     assertThat(responseHandler.getPlayerId()).isEqualTo(1);
-    assertThat(responseHandler.isGameFinished()).isTrue();
+    assertThat(responseHandler.getDivisionResult()).isEqualTo(1);
   }
 
   @Test
