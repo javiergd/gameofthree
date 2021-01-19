@@ -15,14 +15,20 @@ public class GameClient {
   public static final int DEFAULT_PORT = 54321;
   public static final String DEFAULT_HOST = "localhost";
 
+  private int port;
+
   public static void main(String[] args) {
-    GameClient client = new GameClient();
+    GameClient client = new GameClient(args);
     client.handleConnection();
+  }
+
+  private GameClient(String[] args) {
+    this.port = getPortFromArgsOrDefault(args);
   }
 
   private void handleConnection() {
     try (
-      Socket clientSocket = new Socket(DEFAULT_HOST, DEFAULT_PORT);
+      Socket clientSocket = new Socket(DEFAULT_HOST, port);
       PrintWriter writer =
         new PrintWriter(clientSocket.getOutputStream(), true);
       BufferedReader reader =
@@ -34,7 +40,7 @@ public class GameClient {
     ) {
       // Pre-game actions
       GameManager gameManager = new GameManager(reader, writer, stdIn);
-      gameManager.initPlayerVariables();
+      gameManager.processResponse();
 
       // In-game actions
       while(!gameManager.isGameFinished()) {
@@ -43,18 +49,38 @@ public class GameClient {
           gameManager.sendMove(userNumber);
         } else {
           System.out.println("Waiting for server input...");
-          gameManager.processResponse(reader.readLine());
+          gameManager.processResponse();
         }
         gameManager.updateTurn();
       }
 
       // Post game completion actions
-      gameManager.sendGameEnded();
-      System.out.println("Game ended! - Winner is player: " + gameManager.getWinnerId());
+      System.out.print("Game ended! - ");
+      if (gameManager.getWinnerId() == gameManager.getPlayerId()) {
+        System.out.println("You win! :)");
+      } else {
+        gameManager.sendGameEnded();
+        System.out.println("You lose! :(");
+      }
 
     }  catch (IOException e) {
       logger.error("Couldn't get I/O for the connection to localhost");
       System.exit(1);
+    }
+  }
+
+  private int getPortFromArgsOrDefault(String[] args) {
+    if (args.length == 1) {
+      try {
+        return Integer.parseInt(args[0]);
+      } catch (NumberFormatException e) {
+        System.out.println("Invalid port number supplied. Using port " + DEFAULT_PORT + " for connections");
+        return DEFAULT_PORT;
+      }
+    }
+    else {
+      System.out.println("No port supplied. Using port " + DEFAULT_PORT + " for connections");
+      return DEFAULT_PORT;
     }
   }
 
