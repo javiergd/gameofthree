@@ -10,10 +10,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class GameClient {
-  private static final Logger logger = Logger.getLogger(GameClient.class);
-
   public static final int DEFAULT_PORT = 54321;
   public static final String DEFAULT_HOST = "localhost";
+
+  private static final Logger logger = Logger.getLogger(GameClient.class);
 
   private int port;
 

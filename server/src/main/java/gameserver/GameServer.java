@@ -10,14 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameServer {
+
   private static final Logger logger = Logger.getLogger(GameServer.class);
 
   public static final int MAX_CONNECTIONS = 2;
   public static final int DEFAULT_PORT = 54321;
 
+  private final int port;
   private Map<Integer, GameServerThread> playerMap;
   private int turnsPlayed;
-  private int port;
 
   public GameServer(String[] args) {
     this.playerMap = new HashMap<>();
@@ -35,9 +36,6 @@ public class GameServer {
     logger.info("Sending message to player: " + toId);
     ClientResponseHandler response = new ClientResponseHandler(fromId,
       message, turnsPlayed == 0);
-
-    System.out.println(response.buildResponseString());
-
     playerToSend.sendMessage(response.buildResponseString());
     turnsPlayed++;
   }
@@ -46,7 +44,7 @@ public class GameServer {
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       logger.info("Waiting for connections...");
       int connectionCount = 0;
-      while(connectionCount < MAX_CONNECTIONS) {
+      while (connectionCount < MAX_CONNECTIONS) {
         Socket clientSocket = serverSocket.accept();
         connectionCount++;
 
@@ -69,11 +67,11 @@ public class GameServer {
       try {
         return Integer.parseInt(args[0]);
       } catch (NumberFormatException e) {
-        System.out.println("Invalid port number supplied. Using port " + DEFAULT_PORT + " for connections");
+        System.out
+          .println("Invalid port number supplied. Using port " + DEFAULT_PORT + " for connections");
         return DEFAULT_PORT;
       }
-    }
-    else {
+    } else {
       System.out.println("No port supplied. Using port " + DEFAULT_PORT + " for connections");
       return DEFAULT_PORT;
     }

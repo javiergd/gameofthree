@@ -12,6 +12,7 @@ import java.net.Socket;
 public class GameServerThread extends Thread {
 
   private static final Logger logger = Logger.getLogger(GameServerThread.class);
+
   private final int playerId;
   private final int opponentId;
   private final Socket socket;
