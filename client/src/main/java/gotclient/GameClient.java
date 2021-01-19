@@ -41,6 +41,7 @@ public class GameClient {
       // Pre-game actions
       GameManager gameManager = new GameManager(reader, writer, stdIn);
       gameManager.processResponse();
+      gameManager.selectMode();
 
       // In-game actions
       while(!gameManager.isGameFinished()) {

@@ -1,5 +1,7 @@
 package gotclient.message.input;
 
+import gotclient.gamemanager.GameManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -18,10 +20,33 @@ public class UserInputHandler {
     validGameNumbers.add(1);
   }
 
-  public int getValidNumber(boolean isFirstTurn, int currentGameNumber) {
-    return isFirstTurn ? getStartingNumber() :
-      getInputNumberFromSet(validGameNumbers, currentGameNumber);
+  public int getValidNumber(boolean isFirstTurn, int currentGameNumber, int gameMode) {
+    if (isFirstTurn) {
+      return getStartingNumber();
+    }
+    return gameMode == GameManager.MANUAL ?
+      getUserInputNumberFromSet(validGameNumbers, currentGameNumber) :
+      getAutomaticInputNumberFromSet(validGameNumbers, currentGameNumber);
   }
+
+  public int selectInputMode() {
+    int selection = -1;
+    while (!(selection == 0 || selection == 1)) {
+      System.out.print("Enter a number to select the game mode (0 - manual, 1 - auto): ");
+      try {
+        selection = Integer.parseInt(inputReader.readLine());
+        if (!(selection == 0 || selection == 1)) {
+          System.out.println("Please enter only 0 or 1 to select the game mode!");
+        }
+      } catch (NumberFormatException e) {
+        System.out.println("Please enter a valid number!");
+      } catch (IOException e) {
+        System.out.println("Error processing input!");
+      }
+    }
+    return selection;
+  }
+
 
   private int getStartingNumber() {
     int userInputNumber = Integer.MIN_VALUE;
@@ -44,7 +69,7 @@ public class UserInputHandler {
     return userInputNumber;
   }
 
-  private int getInputNumberFromSet(Set<Integer> validNumbers, int currentGameNumber) {
+  private int getUserInputNumberFromSet(Set<Integer> validNumbers, int currentGameNumber) {
     int userInputNumber = Integer.MIN_VALUE;
     boolean isValidNumber = false;
     while (!isValidNumber) {
@@ -68,5 +93,16 @@ public class UserInputHandler {
       }
     }
     return userInputNumber;
+  }
+
+  private int getAutomaticInputNumberFromSet(Set<Integer> validNumbers, int currentGameNumber) {
+    int validNumber = 0;
+    for (Integer candidateNum : validNumbers) {
+      if (((currentGameNumber + candidateNum) % 3) == 0) {
+         validNumber = candidateNum;
+         break;
+      }
+    }
+    return validNumber;
   }
 }
