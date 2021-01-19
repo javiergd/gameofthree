@@ -65,7 +65,7 @@ public class GameClient {
       }
 
     }  catch (IOException e) {
-      logger.error("Couldn't get I/O for the connection to localhost");
+      logger.error("Couldn't get I/O for the connection to " + DEFAULT_HOST);
       System.exit(1);
     }
   }

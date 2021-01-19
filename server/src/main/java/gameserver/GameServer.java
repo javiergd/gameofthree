@@ -1,5 +1,6 @@
 package gameserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gameserver.message.ClientResponseHandler;
 import org.apache.log4j.Logger;
 
@@ -17,7 +18,7 @@ public class GameServer {
   public static final int DEFAULT_PORT = 54321;
 
   private final int port;
-  private Map<Integer, GameServerThread> playerMap;
+  private final Map<Integer, GameServerThread> playerMap;
   private int turnsPlayed;
 
   public GameServer(String[] args) {
@@ -31,7 +32,8 @@ public class GameServer {
     server.acceptConnections();
   }
 
-  protected void forwardMessage(final String message, final int fromId, final int toId) {
+  protected void forwardMessage(final String message, final int fromId, final int toId)
+    throws JsonProcessingException {
     GameServerThread playerToSend = playerMap.get(toId);
     logger.info("Sending message to player: " + toId);
     ClientResponseHandler response = new ClientResponseHandler(fromId,
