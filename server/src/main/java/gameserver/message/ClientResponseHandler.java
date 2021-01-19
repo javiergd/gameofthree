@@ -7,55 +7,81 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.log4j.Logger;
 
 public class ClientResponseHandler {
 
-  private ClientResponseJson clientResponse;
+  private static final Logger logger = Logger.getLogger(ClientResponseHandler.class);
+  public static final int GAME_FINISHED = 2;
+
+  private final ClientResponseJson clientResponse;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
 
   public ClientResponseHandler(final int messageType, final int playerId) {
     this.clientResponse = ClientResponseJson.builder()
-      .messageType(messageType)
-      .playerId(playerId).build();
+      .gameState(messageType)
+      .playerId(playerId)
+      .build();
   }
 
-  public ClientResponseHandler(final int messageType, final int playerId, final int playerResponse) {
-    this.clientResponse = ClientResponseJson.builder()
-      .messageType(messageType)
-      .playerId(playerId)
-      .playerResponse(playerResponse)
-      .divisionResult(playerResponse)
-      .build();
+  public ClientResponseHandler(
+    int fromId,
+    String message,
+    boolean isFirstTurn) {
+
+    String[] stateAndCurrentNumber = message.split(",");
+    int gameState = Integer.parseInt(stateAndCurrentNumber[0]);
+    int playerResponse = Integer.parseInt(stateAndCurrentNumber[1]);
+    int currentGameNumber = Integer.parseInt(stateAndCurrentNumber[2]);
+
+    ClientResponseJson response;
+    if (gameState == GAME_FINISHED) {
+      response = buildEndOfGameResponse(fromId, playerResponse);
+    } else {
+      response = buildInGameResponse(gameState, fromId, playerResponse, currentGameNumber, isFirstTurn);
+    }
+    this.clientResponse = response;
   }
 
   public String buildResponseString() {
     try {
       return objectMapper.writeValueAsString(clientResponse);
     } catch (JsonProcessingException e) {
-      // TODO add logger here
-      System.out.println("Unable to write response as string");
-      e.printStackTrace();
+      logger.error("Unable to write response as string: " + e);
     }
-    return ""; // TODO return here a message ended
+    return "";
   }
 
-  public ClientResponseHandler(
+  private ClientResponseJson buildEndOfGameResponse(
     final int playerId,
-    final String responseString,
+    final int playerResponse) {
+
+    return ClientResponseJson.builder()
+      .gameState(GAME_FINISHED)
+      .playerId(playerId)
+      .divisionResult(1)
+      .isGameFinished(true)
+      .winnerId(playerResponse)
+      .build();
+  }
+
+  private ClientResponseJson buildInGameResponse(
+    final int receivedState,
+    final int playerId,
+    final int playerResponse,
+    final int currentGameNumber,
     final boolean isFirstTurn) {
 
-    String[] stateAndCurrentNumber = responseString.split(",");
-    int messageType = Integer.parseInt(stateAndCurrentNumber[0]);
-    int playerResponse = Integer.parseInt(stateAndCurrentNumber[1]);
-    int divisionResult = isFirstTurn ? playerResponse : playerResponse / 3;
-    boolean isGameFinished = divisionResult == 1 || messageType == 2;
-    int winnerId = messageType == 2 ? playerResponse : -1;
+    int divisionResult = isFirstTurn ? currentGameNumber : currentGameNumber / 3;
+    boolean isGameFinished = divisionResult == 1;
+    int gameState = isGameFinished ? GAME_FINISHED : receivedState;
+    int winnerId = isGameFinished ? playerId : -1;
 
-
-    this.clientResponse = ClientResponseJson.builder()
-      .messageType(messageType)
+    return ClientResponseJson.builder()
+      .gameState(gameState)
       .playerId(playerId)
+      .previousNumber(currentGameNumber)
       .playerResponse(playerResponse)
       .divisionResult(divisionResult)
       .isGameFinished(isGameFinished)
@@ -70,8 +96,9 @@ public class ClientResponseHandler {
   @AllArgsConstructor
   private static class ClientResponseJson {
 
-    private int messageType;
+    private int gameState;
     private int playerId;
+    private int previousNumber;
     private int playerResponse;
     private int divisionResult;
     private boolean isGameFinished;
