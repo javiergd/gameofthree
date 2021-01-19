@@ -1,8 +1,9 @@
 package gotclient.gamemanager;
 
-import gotclient.message.ClientRequestHandler;
 import gotclient.message.ServerResponseHandler;
+import gotclient.message.input.UserInputHandler;
 import lombok.Getter;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,17 +18,22 @@ import java.io.PrintWriter;
 @Getter
 public class GameManager {
 
-  // Player bound
+  private static final Logger logger = Logger.getLogger(GameManager.class);
+
+  private static final int GAME_NOT_STARTED = 0;
+  private static final int GAME_ONGOING = 1;
+  private static final int GAME_FINISHED = 2;
+
+  // Player fields
   private int playerId;
-  private int currentGameValue;
+  private int currentGameNumber;
   private int turnCount;
   private int winnerId;
   private boolean isGameFinished;
   private boolean isThisPlayerTurn;
 
-
   // Request/Response handling
-  private final ClientRequestHandler requestHandler;
+  private final UserInputHandler requestHandler;
   private final ServerResponseHandler responseHandler;
 
   // I/O handling
@@ -35,26 +41,37 @@ public class GameManager {
   private final BufferedReader userReader;
   private final PrintWriter serverWriter;
 
-
-  public GameManager(BufferedReader serverReader,
-                     PrintWriter serverWriter,
-                     BufferedReader userReader) {
+  public GameManager(
+    BufferedReader serverReader,
+    PrintWriter serverWriter,
+    BufferedReader userReader) {
     this.serverReader = serverReader;
     this.serverWriter = serverWriter;
     this.userReader = userReader;
-    this.requestHandler = new ClientRequestHandler(userReader);
+    this.requestHandler = new UserInputHandler(userReader);
     this.responseHandler = new ServerResponseHandler();
   }
 
-  public void initPlayerVariables() throws IOException {
+  public void processResponse() throws IOException {
     responseHandler.updateResponse(serverReader.readLine());
-    System.out.println(responseHandler.getResponseString()); // Greeting from the server
 
-    this.playerId = responseHandler.getPlayerId();
-    this.isThisPlayerTurn = playerId == 1;
-    this.turnCount = isThisPlayerTurn ? 0 : 1;
-    this.currentGameValue = 0;
-    this.isGameFinished = false;
+    switch (responseHandler.getGameState()) {
+      case GAME_NOT_STARTED:
+        initPlayerVariables();
+        break;
+      case GAME_ONGOING:
+        System.out.println("Received: " + responseHandler.getResponseString());
+        this.currentGameNumber = responseHandler.getDivisionResult();
+        break;
+      case GAME_FINISHED:
+        System.out.println("Received finishing message: " + responseHandler.getResponseString());
+        this.isGameFinished = true;
+        this.currentGameNumber = responseHandler.getDivisionResult();
+        winnerId = responseHandler.getWinnerId();
+        break;
+      default:
+        logger.error("Unrecognized game state: " + responseHandler.getGameState());
+    }
   }
 
   public void updateTurn() {
@@ -63,27 +80,26 @@ public class GameManager {
   }
 
   public int getNumberFromPlayer() {
-    return requestHandler.getValidNumber(turnCount == 0);
+    return requestHandler.getValidNumber(turnCount == 0, currentGameNumber);
   }
 
   public void sendMove(int userNumber) {
-    this.currentGameValue += userNumber;
-    String response = "1," + currentGameValue;
+    this.currentGameNumber += userNumber;
+    String response = GAME_ONGOING + "," + userNumber + "," + currentGameNumber;
     this.serverWriter.println(response);
   }
 
   public void sendGameEnded() {
-    String response = "2," + responseHandler.getWinnerId();
+    System.out.println("Current game value: " + currentGameNumber);
+    String response = GAME_FINISHED + "," + responseHandler.getWinnerId() + "," + currentGameNumber;
     this.serverWriter.println(response);
   }
 
-  public void processResponse(String serverInput) {
-    responseHandler.updateResponse(serverInput);
-    System.out.println("Received: " + responseHandler.getResponseString());
-    this.isGameFinished = responseHandler.isGameFinished();
-    this.currentGameValue = responseHandler.getDivisionResult();
-    if (isGameFinished) {
-      winnerId = responseHandler.getWinnerId();
-    }
+  private void initPlayerVariables() {
+    this.playerId = responseHandler.getPlayerId();
+    this.isThisPlayerTurn = playerId == 1;
+    this.turnCount = isThisPlayerTurn ? 0 : 1;
+    this.currentGameNumber = 0;
+    this.isGameFinished = false;
   }
 }
