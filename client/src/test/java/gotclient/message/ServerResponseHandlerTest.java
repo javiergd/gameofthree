@@ -8,7 +8,7 @@ class ServerResponseHandlerTest {
 
   @Test
   public void should_build_server_response_from_full_string() {
-    String inputString = "{\"messageType\":1,"
+    String inputString = "{\"gameState\":1,"
       + "\"playerId\":1,"
       + "\"playerResponse\":3,"
       + "\"divisionResult\":1,"
@@ -24,7 +24,7 @@ class ServerResponseHandlerTest {
 
   @Test
   public void should_build_server_response_from_partial_string() {
-    String inputString = "{\"messageType\":1,"
+    String inputString = "{\"gameState\":1,"
       + "\"playerId\":1,"
       + "\"playerResponse\":3}";
 
