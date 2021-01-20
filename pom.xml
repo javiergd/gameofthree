@@ -25,6 +25,7 @@
     <log4j.version>1.2.17</log4j.version>
     <lombok.version>1.18.16</lombok.version>
     <jackson.databind.version>2.11.1</jackson.databind.version>
+    <junit.jupiter.version>5.7.0</junit.jupiter.version>
     <assertj.core.version>3.18.1</assertj.core.version>
   </properties>
 
@@ -49,7 +50,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>RELEASE</version>
+      <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
