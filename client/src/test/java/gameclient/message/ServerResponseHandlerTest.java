@@ -1,4 +1,4 @@
-package gotclient.message;
+package gameclient.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

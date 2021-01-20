@@ -1,4 +1,4 @@
-package gotclient.message;
+package gameclient.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 /**
  * This class is responsible for storing the latest response received from the server
- * and making it's fields available to the {@link gotclient.gamemanager.GameManager}.
+ * and making it's fields available to the {@link gameclient.gamemanager.GameManager}.
  * The response from the server is expected to be a valid JSON string with (possible incomplete)
  * game state - related values.
  */

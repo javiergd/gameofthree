@@ -1,7 +1,7 @@
-package gotclient.gamemanager;
+package gameclient.gamemanager;
 
-import gotclient.message.ServerResponseHandler;
-import gotclient.message.input.UserInputHandler;
+import gameclient.message.ServerResponseHandler;
+import gameclient.message.input.UserInputHandler;
 import lombok.Getter;
 import org.apache.log4j.Logger;
 

@@ -1,6 +1,6 @@
-package gotclient;
+package gameclient;
 
-import gotclient.gamemanager.GameManager;
+import gameclient.gamemanager.GameManager;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;

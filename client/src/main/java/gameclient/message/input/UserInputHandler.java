@@ -1,6 +1,6 @@
-package gotclient.message.input;
+package gameclient.message.input;
 
-import gotclient.gamemanager.GameManager;
+import gameclient.gamemanager.GameManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
