@@ -1,4 +1,4 @@
-# Game of Three (Takeaway.com coding challenge)
+# Game of Three
 
 ### Description: 
 This repository contains the code for the 'Game of Three' coding challenge. 
