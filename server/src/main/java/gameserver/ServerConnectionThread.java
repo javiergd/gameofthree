@@ -9,9 +9,16 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class GameServerThread extends Thread {
+/**
+ * This class provides the server-side connection to exchange messages with the client.
+ * Essentially it listens on the socket and whenever a message is received it forwards
+ * it via the server to the opponent player.
+ */
+public class ServerConnectionThread extends Thread {
 
-  private static final Logger logger = Logger.getLogger(GameServerThread.class);
+  private static final Logger logger = Logger.getLogger(ServerConnectionThread.class);
+  public static final int PLAYER_ONE = 1;
+  public static final int PLAYER_TWO = 2;
 
   private final int playerId;
   private final int opponentId;
@@ -20,12 +27,12 @@ public class GameServerThread extends Thread {
 
   private PrintWriter out;
 
-  public GameServerThread(Socket socket, GameServer server, final int playerId) {
+  public ServerConnectionThread(Socket socket, GameServer server, final int playerId) {
     super("GameServerThread - " + playerId);
     this.socket = socket;
     this.server = server;
     this.playerId = playerId;
-    this.opponentId = playerId == 1 ? 2 : 1;
+    this.opponentId = playerId == PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE;
     try {
       this.out = new PrintWriter(socket.getOutputStream(), true);
     } catch (IOException e) {
@@ -42,7 +49,7 @@ public class GameServerThread extends Thread {
       // Pre-game action - send welcome message
       ClientResponseHandler responseHandler = new ClientResponseHandler(0, playerId);
       sendMessage(responseHandler.buildResponseString());
-      
+
       // Send messages in buffer, if any
       if (server.hasBufferedMessages()) {
         server.forwardBufferedMessage(this.playerId);

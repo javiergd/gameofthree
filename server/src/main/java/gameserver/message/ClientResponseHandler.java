@@ -8,9 +8,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * This class handles the incoming messages for the client and builds an appropriate response
+ * based on the message content. It also stores this response and provides a convenient way
+ * for the server to forward it as a string.
+ */
 public class ClientResponseHandler {
 
-  public static final int GAME_FINISHED = 2;
+  private static final int GAME_FINISHED = 2;
+
+  private static final int GAME_STATE_FIELD = 0;
+  private static final int PLAYER_RESPONSE_FIELD = 1;
+  private static final int CURRENT_GAME_FIELD = 2;
 
   private final ClientResponseJson clientResponse;
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -29,15 +38,16 @@ public class ClientResponseHandler {
     boolean isFirstTurn) {
 
     String[] stateAndCurrentNumber = message.split(",");
-    int gameState = Integer.parseInt(stateAndCurrentNumber[0]);
-    int playerResponse = Integer.parseInt(stateAndCurrentNumber[1]);
-    int currentGameNumber = Integer.parseInt(stateAndCurrentNumber[2]);
+    int gameState = Integer.parseInt(stateAndCurrentNumber[GAME_STATE_FIELD]);
+    int playerResponse = Integer.parseInt(stateAndCurrentNumber[PLAYER_RESPONSE_FIELD]);
+    int currentGameNumber = Integer.parseInt(stateAndCurrentNumber[CURRENT_GAME_FIELD]);
 
     ClientResponseJson response;
     if (gameState == GAME_FINISHED) {
       response = buildEndOfGameResponse(fromId, playerResponse);
     } else {
-      response = buildInGameResponse(gameState, fromId, playerResponse, currentGameNumber, isFirstTurn);
+      response = buildInGameResponse(gameState, fromId, playerResponse, currentGameNumber,
+        isFirstTurn);
     }
     this.clientResponse = response;
   }

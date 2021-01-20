@@ -12,6 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Entry point for the Game of Three server. This class is responsible for listening to incoming
+ * clients and spawning a new thread to service the communication with them
+ * (via {@link ServerConnectionThread}).
+ * As the server knows which clients are connected at each time, it serves as a brokering service
+ * between the connected clients.
+ * The clients messages are processed with the help of the {@link ClientResponseHandler}.
+ * Additionally, the server keeps a small buffer to enable starting a game even when not 2 players
+ * have joined the game.
+ */
 public class GameServer {
 
   private static final Logger logger = Logger.getLogger(GameServer.class);
@@ -21,7 +31,7 @@ public class GameServer {
   private static final int BUFFER_CAPACITY = 1;
 
   private final int port;
-  private final Map<Integer, GameServerThread> playerMap;
+  private final Map<Integer, ServerConnectionThread> playerMap;
   private final List<String> messageBuffer;
   private int turnsPlayed;
 
@@ -39,22 +49,25 @@ public class GameServer {
 
   protected void forwardMessage(final String message, final int fromId, final int toId)
     throws JsonProcessingException {
-    GameServerThread playerToSend = playerMap.get(toId);
-    logger.info("Sending message to player: " + toId);
+    ServerConnectionThread playerToSend = playerMap.get(toId);
+
     ClientResponseHandler response = new ClientResponseHandler(fromId,
       message, turnsPlayed == 0);
 
     String responseString = response.buildResponseString();
     if (playerToSend == null) {
+      logger.info("Buffering message for player: " + toId);
       messageBuffer.add(responseString);
     } else {
+      logger.info("Sending message to player: " + toId);
       playerToSend.sendMessage(responseString);
     }
     turnsPlayed++;
   }
 
   protected void forwardBufferedMessage(final int toId) {
-    GameServerThread playerToSend = playerMap.get(toId);
+    ServerConnectionThread playerToSend = playerMap.get(toId);
+    logger.info("Sending buffered message to player: " + toId);
     playerToSend.sendMessage(messageBuffer.get(0));
     messageBuffer.clear();
   }
@@ -72,7 +85,7 @@ public class GameServer {
         connectionCount++;
 
         logger.info("A player joined. Connected players:  " + connectionCount);
-        GameServerThread gotServerThread = new GameServerThread(clientSocket,
+        ServerConnectionThread gotServerThread = new ServerConnectionThread(clientSocket,
           this, connectionCount);
         playerMap.put(connectionCount, gotServerThread);
 
@@ -84,8 +97,6 @@ public class GameServer {
       logger.error(e.getMessage());
     }
   }
-
-
 
   private int getPortFromArgsOrDefault(String[] args) {
     if (args.length == 1) {
@@ -101,7 +112,4 @@ public class GameServer {
       return DEFAULT_PORT;
     }
   }
-
-
-
 }
