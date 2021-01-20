@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.log4j.Logger;
 
+/**
+ * This class is responsible for storing the latest response received from the server
+ * and making it's fields available to the {@link gotclient.gamemanager.GameManager}.
+ * The response from the server is expected to be a valid JSON string with (possible incomplete)
+ * game state - related values.
+ */
 @NoArgsConstructor
 public class ServerResponseHandler {
   private final Logger logger = Logger.getLogger(ServerResponseHandler.class);

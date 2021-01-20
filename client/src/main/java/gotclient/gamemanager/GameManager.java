@@ -13,7 +13,8 @@ import java.io.PrintWriter;
  * Controller class for the game mechanics on the client side of the Game Of Three.
  * The purpose of this class is to monitor the state of the player variables which
  * are updated after every game move.
- * Input from the server is delegated to the @link{ClientRequestHandler}
+ * Input from the client side is delegated to the {@link UserInputHandler}
+ * Messages received from the server are managed by the {@link ServerResponseHandler}
  */
 @Getter
 public class GameManager {
@@ -96,7 +97,6 @@ public class GameManager {
   }
 
   public void sendGameEnded() {
-    System.out.println("Current game value: " + currentGameNumber);
     String response = GAME_FINISHED + "," + responseHandler.getWinnerId() + "," + currentGameNumber;
     this.serverWriter.println(response);
   }

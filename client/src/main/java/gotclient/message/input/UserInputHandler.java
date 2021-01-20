@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class is responsible for providing the appropriate user input for the Game of Three
+ * This input is always a number, which can represent either the game mode (automatic or manual) or
+ * an move in the game (i.e. an integer divisible by 3).
+ */
 public class UserInputHandler {
 
   private final BufferedReader inputReader;

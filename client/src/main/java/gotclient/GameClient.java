@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+/**
+ * Entry point for the client in Game of Three. This class handles the communication
+ * with the game server and exchanges messages until the game ends.
+ */
 public class GameClient {
   public static final int DEFAULT_PORT = 54321;
   public static final String DEFAULT_HOST = "localhost";
