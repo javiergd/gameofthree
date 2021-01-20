@@ -14,6 +14,9 @@ import java.util.Set;
  */
 public class UserInputHandler {
 
+  private static final String ENTER_VALID_NUMBER_MESSAGE = "Please enter a valid number!";
+  private static final String ERROR_PROCESSING_INPUT_MESSAGE = "Error processing input!";
+
   private final BufferedReader inputReader;
   private final Set<Integer> validGameNumbers = new HashSet<>();
 
@@ -44,9 +47,9 @@ public class UserInputHandler {
           System.out.println("Please enter only 0 or 1 to select the game mode!");
         }
       } catch (NumberFormatException e) {
-        System.out.println("Please enter a valid number!");
+        System.out.println(ENTER_VALID_NUMBER_MESSAGE);
       } catch (IOException e) {
-        System.out.println("Error processing input!");
+        System.out.println(ERROR_PROCESSING_INPUT_MESSAGE);
       }
     }
     return selection;
@@ -66,9 +69,9 @@ public class UserInputHandler {
           validNumberEntered = true;
         }
       } catch (NumberFormatException e) {
-        System.out.println("Please enter a valid number!");
+        System.out.println(ENTER_VALID_NUMBER_MESSAGE);
       } catch (IOException e) {
-        System.out.println("Error processing input!");
+        System.out.println(ERROR_PROCESSING_INPUT_MESSAGE);
       }
     }
     return userInputNumber;
@@ -92,9 +95,9 @@ public class UserInputHandler {
           isValidNumber = false;
         }
       } catch (NumberFormatException e) {
-        System.out.println("Please enter a valid number!");
+        System.out.println(ENTER_VALID_NUMBER_MESSAGE);
       } catch (IOException e) {
-        System.out.println("Error processing input!");
+        System.out.println(ERROR_PROCESSING_INPUT_MESSAGE);
       }
     }
     return userInputNumber;
