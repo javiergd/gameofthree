@@ -42,6 +42,11 @@ public class GameServerThread extends Thread {
       // Pre-game action - send welcome message
       ClientResponseHandler responseHandler = new ClientResponseHandler(0, playerId);
       sendMessage(responseHandler.buildResponseString());
+      
+      // Send messages in buffer, if any
+      if (server.hasBufferedMessages()) {
+        server.forwardBufferedMessage(this.playerId);
+      }
 
       // In-game: turn-based message exchange
       String inputLine;

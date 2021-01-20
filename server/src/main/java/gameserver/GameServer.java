@@ -7,22 +7,27 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameServer {
 
   private static final Logger logger = Logger.getLogger(GameServer.class);
 
-  public static final int MAX_CONNECTIONS = 2;
-  public static final int DEFAULT_PORT = 54321;
+  private static final int MAX_CONNECTIONS = 2;
+  private static final int DEFAULT_PORT = 54321;
+  private static final int BUFFER_CAPACITY = 1;
 
   private final int port;
   private final Map<Integer, GameServerThread> playerMap;
+  private final List<String> messageBuffer;
   private int turnsPlayed;
 
   public GameServer(String[] args) {
     this.playerMap = new HashMap<>();
+    this.messageBuffer = new ArrayList<>(BUFFER_CAPACITY);
     this.turnsPlayed = 0;
     this.port = getPortFromArgsOrDefault(args);
   }
@@ -38,8 +43,24 @@ public class GameServer {
     logger.info("Sending message to player: " + toId);
     ClientResponseHandler response = new ClientResponseHandler(fromId,
       message, turnsPlayed == 0);
-    playerToSend.sendMessage(response.buildResponseString());
+
+    String responseString = response.buildResponseString();
+    if (playerToSend == null) {
+      messageBuffer.add(responseString);
+    } else {
+      playerToSend.sendMessage(responseString);
+    }
     turnsPlayed++;
+  }
+
+  protected void forwardBufferedMessage(final int toId) {
+    GameServerThread playerToSend = playerMap.get(toId);
+    playerToSend.sendMessage(messageBuffer.get(0));
+    messageBuffer.clear();
+  }
+
+  protected boolean hasBufferedMessages() {
+    return !messageBuffer.isEmpty();
   }
 
   private void acceptConnections() {
@@ -64,6 +85,8 @@ public class GameServer {
     }
   }
 
+
+
   private int getPortFromArgsOrDefault(String[] args) {
     if (args.length == 1) {
       try {
@@ -78,4 +101,7 @@ public class GameServer {
       return DEFAULT_PORT;
     }
   }
+
+
+
 }
